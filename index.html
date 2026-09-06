@@ -1,0 +1,121 @@
+<!doctype html>
+<!--
+THESIS: Weather should read like a calm instrument, not a stack of dashboard cards.
+OWN-WORLD: Ink-black night sky, mineral panels, electric blue weather data, and a horizon glow that changes with conditions.
+STORY: Search a place, see the answer settle into the sky, then scan the week without losing the present moment.
+FIRST VIEWPORT: A compact masthead and search sit above one wide current-conditions stage; forecast and details follow below.
+FORM: Single-surface weather instrument; the weather field is the composition, not a hero above a card grid.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="WetherApp — weather for the places you care about." />
+    <title>Wether — Weather, clearly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Noto Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+              display: ["Bricolage Grotesque", "Noto Sans", "ui-sans-serif", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+      <main class="relative z-10 mx-auto min-h-screen w-full max-w-6xl px-5 pb-12 pt-6 sm:px-8 sm:pt-8">
+        <header class="flex items-center justify-between gap-4">
+          <a class="brand" href="/" aria-label="WetherApp home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 16.5a4.5 4.5 0 1 1 1.12-8.86A6 6 0 0 1 19 10.5a3.5 3.5 0 0 1-.5 6.98H6.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span>Wether<span class="brand-dot">.</span></span>
+          </a>
+          <div class="flex items-center gap-2">
+            <button class="icon-button" id="locationButton" type="button" title="Use my location" aria-label="Use my location">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.13 7-11a7 7 0 1 0-14 0c0 5.87 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg>
+            </button>
+            <button class="unit-switch" id="unitToggle" type="button" aria-label="Switch temperature unit">
+              <span data-unit="celsius">°C</span><span data-unit="fahrenheit">°F</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="search-wrap" aria-label="Find a city">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16.2 16.2 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <label class="sr-only" for="cityInput">Search for a city</label>
+            <input id="cityInput" type="search" autocomplete="off" placeholder="Search for a city..." />
+            <button id="searchButton" class="search-submit" type="button">Search <span>↵</span></button>
+          </div>
+          <p class="search-hint">Try a city anywhere in the world</p>
+          <div class="saved-locations" id="savedLocations" aria-label="Saved locations"></div>
+        </section>
+
+        <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+
+        <section id="weatherContent" class="weather-content" aria-label="Current weather">
+          <div class="weather-stage">
+            <div class="stage-grid"></div>
+            <div class="sun-orb" aria-hidden="true"></div>
+            <div class="stage-topline">
+              <div>
+                <p class="location-label"><span class="location-pulse"></span><span id="locationName">London, UK</span></p>
+                <p class="date-label" id="dateLabel">Tuesday, September 6 · 09:14</p>
+              </div>
+              <p class="updated-label">Updated just now</p>
+            </div>
+            <div class="stage-main">
+              <div>
+                <p class="condition-label" id="conditionLabel">Partly cloudy</p>
+                <div class="temperature"><span id="temperature">18</span><sup>°</sup></div>
+                <p class="feels-label">Feels like <strong id="feelsLike">17°</strong></p>
+              </div>
+              <div class="weather-visual" id="weatherVisual" aria-hidden="true">
+                <div class="cloud cloud-back"></div><div class="cloud cloud-front"></div><div class="weather-sun"></div>
+              </div>
+            </div>
+            <div class="stage-footer">
+              <p id="conditionDescription">A comfortable day with a few passing clouds.</p>
+              <div class="stage-divider"></div>
+              <p>High <strong id="highTemp">20°</strong> <span class="muted-separator">/</span> Low <strong id="lowTemp">13°</strong></p>
+            </div>
+            <button class="save-location" id="saveLocation" type="button">☆ Save this place</button>
+          </div>
+
+          <section class="hourly-section" aria-labelledby="hourlyHeading">
+            <div class="section-heading"><h2 id="hourlyHeading">Next 24 hours</h2><span>Hourly outlook</span></div>
+            <div class="hourly-list" id="hourlyList"></div>
+          </section>
+
+          <div class="details-row" aria-label="Weather details">
+            <div class="detail-item"><span class="detail-icon">↗</span><div><p>Wind</p><strong id="windValue">12 km/h</strong></div></div>
+            <div class="detail-item"><span class="detail-icon">◌</span><div><p>Humidity</p><strong id="humidityValue">64%</strong></div></div>
+            <div class="detail-item"><span class="detail-icon">◒</span><div><p>Visibility</p><strong id="visibilityValue">10 km</strong></div></div>
+            <div class="detail-item"><span class="detail-icon">◐</span><div><p>Pressure</p><strong id="pressureValue">1018 hPa</strong></div></div>
+            <div class="detail-item"><span class="detail-icon">◔</span><div><p>UV index</p><strong id="uvValue">—</strong></div></div>
+            <div class="detail-item"><span class="detail-icon">◒</span><div><p>Sunrise</p><strong id="sunriseValue">—</strong></div></div>
+          </div>
+
+          <section class="forecast-section" aria-labelledby="forecastHeading">
+            <div class="section-heading"><h2 id="forecastHeading">This week</h2><span>5 day forecast</span></div>
+            <div class="forecast-list" id="forecastList"></div>
+          </section>
+        </section>
+        <footer class="site-footer"><span>WetherApp</span><span>Data by Open-Meteo</span></footer>
+      </main>
+    </div>
+    <script defer src="app.js"></script>
+  </body>
+</html>
